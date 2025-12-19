@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>book1</title>
+  <link rel="stylesheet" href="book11.css" />
+</head>
+<body class="dark">
+  <ul class="nav">
+    <li><a href="javascript:history.back()">← 내려가기</a></li>
+  </ul>
+  <p class="title">램프의 이음새</p>
+  <main class="wrap">
+    <section class="gallery" id="gallery">
+      <a class="card r34" href="photo121.html"><img src="img/30.jpg" alt="램프의 이음새 사진 7"><span class="cap">올라가기</span></a>
+      <a class="card r43" href="photo122.html"><img src="img/8.jpeg" alt="램프의 이음새 사진 8"><span class="cap">올라가기</span></a>
+      <img class="card r11" src="img/17.jpeg" alt="램프의 이음새 사진9"> 
+      <img class="card r34" src="img/12.jpeg" alt="램프의 이음새 사진 10"> 
+      <img class="card r43" src="img/18.jpeg" alt="램프의 이음새 사진 11"> 
+      <img class="card r11" src="img/3.jpeg" alt="램프의 이음새 사진 12">
+      <div class="card text">
+        <p class="text1">
+          기둥이 각각 따로 떠 잇으면 옆힘에 의해서 흔들리고 벌어지거나, 기둥들이 접해 있는 부분들 중 약한 곳부터 파손이 생기기 쉽습니다. 기둥 사이 이음새가 있어야 힘의 길이 생겨서 안정성이 커지고 손상도 줄어듭니다.
+        </p>
+        </div>
+    </section>
+  </main>
+  <script>
+  (function () {
+    const PAD = 14;
+    const TRIES = 6000;
+    const KEY_BASE = "book1_layout_v4";
+
+    function navType() {
+      const e = performance.getEntriesByType("navigation");
+      return (e && e[0] && e[0].type) ? e[0].type : "navigate";
+    }
+
+    function mode() {
+      return window.matchMedia("(max-width: 650px)").matches ? "sm" : "lg";
+    }
+
+    function key() {
+      return KEY_BASE + "_" + mode();
+    }
+
+    function intersects(a, b) {
+      return !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
+    }
+
+    function get() {
+      const container = document.querySelector(".gallery");
+      const cards = Array.from(document.querySelectorAll(".gallery .card"));
+      return { container, cards };
+    }
+
+    function save(layout) {
+      sessionStorage.setItem(key(), JSON.stringify(layout));
+    }
+
+    function load() {
+      const raw = sessionStorage.getItem(key());
+      if (!raw) return null;
+      try { return JSON.parse(raw); } catch { return null; }
+    }
+
+    function genLayout(container, cards) {
+      const cw = container.clientWidth;
+      const ch = container.clientHeight;
+
+      const placed = [];
+      const layout = [];
+
+      for (const card of cards) {
+        const w = card.offsetWidth;
+        const h = card.offsetHeight;
+
+        const rangeX = Math.max(1, cw - w - PAD * 2);
+        const rangeY = Math.max(1, ch - h - PAD * 2);
+
+        let ok = false;
+
+        for (let t = 0; t < TRIES; t++) {
+          const fx = Math.random();
+          const fy = Math.random();
+          const x = PAD + fx * rangeX;
+          const y = PAD + fy * rangeY;
+
+          const r = { x, y, w, h };
+          if (!placed.some(p => intersects(r, p))) {
+            placed.push(r);
+            layout.push({ fx, fy });
+            ok = true;
+            break;
+          }
+        }
+
+        if (!ok) layout.push({ fx: Math.random(), fy: Math.random() });
+      }
+
+      return layout;
+    }
+
+    function apply(container, cards, layout) {
+      const cw = container.clientWidth;
+      const ch = container.clientHeight;
+
+      cards.forEach((card, i) => {
+        const w = card.offsetWidth;
+        const h = card.offsetHeight;
+
+        const rangeX = Math.max(1, cw - w - PAD * 2);
+        const rangeY = Math.max(1, ch - h - PAD * 2);
+
+        const fx = layout[i]?.fx ?? Math.random();
+        const fy = layout[i]?.fy ?? Math.random();
+
+        card.style.left = (PAD + fx * rangeX) + "px";
+        card.style.top  = (PAD + fy * rangeY) + "px";
+      });
+    }
+
+    function place(forceNew) {
+      const { container, cards } = get();
+      if (!container || cards.length === 0) return;
+
+      let layout = (!forceNew ? load() : null);
+
+      if (!layout || !Array.isArray(layout) || layout.length !== cards.length) {
+        layout = genLayout(container, cards);
+        save(layout);
+      }
+
+      apply(container, cards, layout);
+    }
+
+    window.addEventListener("load", function () {
+      const t = navType();
+      place(t !== "reload");
+    });
+
+    window.addEventListener("pageshow", function (e) {
+      const t = navType();
+      if (e.persisted || t === "back_forward") place(true);
+    });
+
+    let raf = 0;
+    window.addEventListener("resize", function () {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => place(false));
+    });
+  })();
+  </script>
+</body>
+</html>

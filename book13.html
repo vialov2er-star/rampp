@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>book1</title>
+  <link rel="stylesheet" href="book11.css"/>
+</head>
+<body class="dark">
+  <ul class="nav">
+    <li><a href="javascript:history.back()">← 내려가기</a></li>
+  </ul>
+  <p class="title">램프의 기둥</p>
+  <main class="wrap">
+    <section class="gallery" id="gallery">
+      <img class="card r34" src="img/2.jpeg" alt="램프의 기둥 사진 1">
+      <img class="card r11" src="img/16.jpeg" alt="램프의 기둥 사진 2"> 
+      <img class="card r11" src="img/23.jpeg" alt="램프의 기둥 사진 3">
+      <a class="card r34" href="photo131.html"><img src="img/6.jpeg" alt="램프의 기둥 사진 4"><span class="cap">올라가기</span></a>
+      <a class="card r43" href="photo132.html"><img src="img/4.jpeg" alt="램프의 기둥 사진 5"><span class="cap">올라가기</span></a>
+      <img class="card r11" src="img/25.jpeg" alt="램프의 기둥 사진 6">
+      <div class="card text">
+        <p class="text1">
+          램프의 기둥은 손잡이를 세워 고정해주는 세로 부재입니다. 사람이 잡거나 기대면서 생기는 힘을 바닥과 벽으로 전달해서 난간이 흔들리거나 휘지 않게 하고, 일정 간격으로 서 있으면서 손잡이가 끊기지 않고 안정적으로 이어지게 만들어 줍니다.
+        </p>
+      </div>
+    </section>
+  </main>
+  <script>
+  (function () {
+    const PAD = 14;
+    const TRIES = 6000;
+    const KEY_BASE = "book1_layout_v4";
+
+    function navType() {
+      const e = performance.getEntriesByType("navigation");
+      return (e && e[0] && e[0].type) ? e[0].type : "navigate";
+    }
+
+    function mode() {
+      return window.matchMedia("(max-width: 650px)").matches ? "sm" : "lg";
+    }
+
+    function key() {
+      return KEY_BASE + "_" + mode();
+    }
+
+    function intersects(a, b) {
+      return !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
+    }
+
+    function get() {
+      const container = document.querySelector(".gallery");
+      const cards = Array.from(document.querySelectorAll(".gallery .card"));
+      return { container, cards };
+    }
+
+    function save(layout) {
+      sessionStorage.setItem(key(), JSON.stringify(layout));
+    }
+
+    function load() {
+      const raw = sessionStorage.getItem(key());
+      if (!raw) return null;
+      try { return JSON.parse(raw); } catch { return null; }
+    }
+
+    function genLayout(container, cards) {
+      const cw = container.clientWidth;
+      const ch = container.clientHeight;
+
+      const placed = [];
+      const layout = [];
+
+      for (const card of cards) {
+        const w = card.offsetWidth;
+        const h = card.offsetHeight;
+
+        const rangeX = Math.max(1, cw - w - PAD * 2);
+        const rangeY = Math.max(1, ch - h - PAD * 2);
+
+        let ok = false;
+
+        for (let t = 0; t < TRIES; t++) {
+          const fx = Math.random();
+          const fy = Math.random();
+          const x = PAD + fx * rangeX;
+          const y = PAD + fy * rangeY;
+
+          const r = { x, y, w, h };
+          if (!placed.some(p => intersects(r, p))) {
+            placed.push(r);
+            layout.push({ fx, fy });
+            ok = true;
+            break;
+          }
+        }
+
+        if (!ok) layout.push({ fx: Math.random(), fy: Math.random() });
+      }
+
+      return layout;
+    }
+
+    function apply(container, cards, layout) {
+      const cw = container.clientWidth;
+      const ch = container.clientHeight;
+
+      cards.forEach((card, i) => {
+        const w = card.offsetWidth;
+        const h = card.offsetHeight;
+
+        const rangeX = Math.max(1, cw - w - PAD * 2);
+        const rangeY = Math.max(1, ch - h - PAD * 2);
+
+        const fx = layout[i]?.fx ?? Math.random();
+        const fy = layout[i]?.fy ?? Math.random();
+
+        card.style.left = (PAD + fx * rangeX) + "px";
+        card.style.top  = (PAD + fy * rangeY) + "px";
+      });
+    }
+
+    function place(forceNew) {
+      const { container, cards } = get();
+      if (!container || cards.length === 0) return;
+
+      let layout = (!forceNew ? load() : null);
+
+      if (!layout || !Array.isArray(layout) || layout.length !== cards.length) {
+        layout = genLayout(container, cards);
+        save(layout);
+      }
+
+      apply(container, cards, layout);
+    }
+
+    window.addEventListener("load", function () {
+      const t = navType();
+      place(t !== "reload");
+    });
+
+    window.addEventListener("pageshow", function (e) {
+      const t = navType();
+      if (e.persisted || t === "back_forward") place(true);
+    });
+
+    let raf = 0;
+    window.addEventListener("resize", function () {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => place(false));
+    });
+  })();
+  </script>
+</body>
+</html>

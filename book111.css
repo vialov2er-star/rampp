@@ -1,0 +1,158 @@
+html, body{
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body.dark{
+  background: #000;
+  font-family: system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif;
+  color: #fff;
+}
+
+.nav{
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  font-size: 12px;
+  margin: 0;
+  padding: 12px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background: transparent;
+}
+
+.nav a{
+  margin: 0;
+  padding: 6px 10px;
+  text-decoration: none;
+  color: #fff;
+}
+
+.nav a:hover{ opacity: 0; }
+
+.title{
+  position: fixed;
+  top: 44px;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  color: #fff;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.wrap{
+  position: fixed;
+  inset: 0;
+  padding-top: 76px;
+  box-sizing: border-box;
+}
+
+.split{
+  width: 100%;
+  height: calc(100vh - 76px);
+  display: flex;
+  gap: 18px;
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+.left{
+  flex: 1;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.left img{
+  width: 90%;
+  height: 96%;
+  object-fit: contain;
+  display: block;
+}
+
+.right{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.box{
+  padding: 14px;
+  box-sizing: border-box;
+}
+
+.h2{
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+
+.p{
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.coverLink{
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: #fff;
+  padding: 14px;
+  box-sizing: border-box;
+}
+
+.coverPreview{
+  position: absolute;
+  top: 44px;
+  right: 14px;
+  width: 170px;
+  height: auto;
+  max-height: 220px;
+  object-fit: contain;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.coverLink:hover .coverPreview{
+  opacity: 1;
+}
+
+@media (max-width: 650px){
+  .split{
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .left{
+    flex: none;
+    height: 38vh;
+  }
+
+  .right{
+    flex: 1;
+    min-height: 0;
+  }
+
+  .coverPreview{
+    width: 140px;
+    max-height: 190px;
+  }
+}
